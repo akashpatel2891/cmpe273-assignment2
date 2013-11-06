@@ -3,7 +3,7 @@ package edu.sjsu.cmpe.library.api.resources;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
+//import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -24,10 +24,15 @@ import edu.sjsu.cmpe.library.dto.BooksDto;
 import edu.sjsu.cmpe.library.dto.LinkDto;
 import edu.sjsu.cmpe.library.repository.BookRepositoryInterface;
 
+
+import javax.jms.JMSException;
+
+
 @Path("/v1/books")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class BookResource {
+public class BookResource
+{
     /** bookRepository instance */
     private final BookRepositoryInterface bookRepository;
 
@@ -37,38 +42,38 @@ public class BookResource {
      * @param bookRepository
      *            a BookRepository instance
      */
-    public BookResource(BookRepositoryInterface bookRepository) {
-	this.bookRepository = bookRepository;
+    public BookResource(BookRepositoryInterface bookRepository)
+    {
+    	this.bookRepository = bookRepository;
     }
 
     @GET
     @Path("/{isbn}")
     @Timed(name = "view-book")
-    public BookDto getBookByIsbn(@PathParam("isbn") LongParam isbn) {
-	Book book = bookRepository.getBookByISBN(isbn.get());
-	BookDto bookResponse = new BookDto(book);
-	bookResponse.addLink(new LinkDto("view-book", "/books/" + book.getIsbn(),
-		"GET"));
-	bookResponse.addLink(new LinkDto("update-book-status", "/books/"
-		+ book.getIsbn(), "PUT"));
-	// add more links
+    public BookDto getBookByIsbn(@PathParam("isbn") LongParam isbn)
+    {
+    	Book book = bookRepository.getBookByISBN(isbn.get());
+    	BookDto bookResponse = new BookDto(book);
+    	bookResponse.addLink(new LinkDto("view-book", "/books/" + book.getIsbn(),"GET"));
+    	bookResponse.addLink(new LinkDto("update-book-status", "/books/"+ book.getIsbn(), "PUT"));
+    	// 	add more links
 
-	return bookResponse;
+    	return bookResponse;
     }
 
     @POST
     @Timed(name = "create-book")
-    public Response createBook(@Valid Book request) {
-	// Store the new book in the BookRepository so that we can retrieve it.
-	Book savedBook = bookRepository.saveBook(request);
+    public Response createBook(@Valid Book request)
+    {
+    	// Store the new book in the BookRepository so that we can retrieve it.
+    	Book savedBook = bookRepository.saveBook(request);
 
-	String location = "/books/" + savedBook.getIsbn();
-	BookDto bookResponse = new BookDto(savedBook);
-	bookResponse.addLink(new LinkDto("view-book", location, "GET"));
-	bookResponse
-	.addLink(new LinkDto("update-book-status", location, "PUT"));
+    	String location = "/books/" + savedBook.getIsbn();
+    	BookDto bookResponse = new BookDto(savedBook);
+    	bookResponse.addLink(new LinkDto("view-book", location, "GET"));
+    	bookResponse.addLink(new LinkDto("update-book-status", location, "PUT"));
 
-	return Response.status(201).entity(bookResponse).build();
+    	return Response.status(201).entity(bookResponse).build();
     }
 
     @GET
@@ -77,7 +82,7 @@ public class BookResource {
     public BooksDto getAllBooks() {
 	BooksDto booksResponse = new BooksDto(bookRepository.getAllBooks());
 	booksResponse.addLink(new LinkDto("create-book", "/books", "POST"));
-
+	System.out.println(" Hello...!!");
 	return booksResponse;
     }
 
@@ -85,10 +90,10 @@ public class BookResource {
     @Path("/{isbn}")
     @Timed(name = "update-book-status")
     public Response updateBookStatus(@PathParam("isbn") LongParam isbn,
-	    @DefaultValue("available") @QueryParam("status") Status status) {
-	Book book = bookRepository.getBookByISBN(isbn.get());
-	book.setStatus(status);
-
+	    @QueryParam("status") Status status) throws JMSException {
+    System.out.println(" Hello...!!");
+	Book book = bookRepository.update(isbn.get(), status);
+	System.out.println(status);
 	BookDto bookResponse = new BookDto(book);
 	String location = "/books/" + book.getIsbn();
 	bookResponse.addLink(new LinkDto("view-book", location, "GET"));
@@ -107,4 +112,3 @@ public class BookResource {
 	return bookResponse;
     }
 }
-

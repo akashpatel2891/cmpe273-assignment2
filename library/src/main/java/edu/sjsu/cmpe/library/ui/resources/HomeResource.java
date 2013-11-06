@@ -13,12 +13,14 @@ import edu.sjsu.cmpe.library.ui.views.HomeView;
 public class HomeResource {
     private final BookRepositoryInterface bookRepository;
 
-    public HomeResource(BookRepositoryInterface bookRepository) {
-	this.bookRepository = bookRepository;
+    public HomeResource(BookRepositoryInterface bookRepository)
+    {
+    	this.bookRepository = bookRepository;
     }
 
     @GET
-    public HomeView getHome() {
-	return new HomeView(bookRepository.getBookByISBN(1L));
+    public HomeView getHome()
+    {
+    	return new HomeView(bookRepository.getAllBooks());
     }
 }
